@@ -6,7 +6,10 @@ import bdd
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--verbose", "-v", help="Rendre le programme bavard", action="store_true")
+parser.add_argument("--verbose",
+                    "-v",
+                    help="Rendre le programme bavard",
+                    action="store_true")
 args = parser.parse_args()
 
 # initialisation du serveur
@@ -34,7 +37,10 @@ def handle_request(op, data):
 
     elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
         if "etud" in data:
-            code, reply = bdd.get_student_mean(data['etud'])
+            if bdd.student_exists(data['etud']):
+                code, reply = bdd.get_student_mean(data['etud'])
+            else:
+                code = 2
 
     elif op == "GET_PROMO_MEAN": # Commande permettant de récupérer la moyenne d'une promotion
         if "promo" in data:
@@ -45,7 +51,7 @@ def handle_request(op, data):
                 code, reply = bdd.get_promo_mean(promo_id)
 
     elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
-        if "nom" in data and "prenom" in data and "promo" in data :
+        if "nom" in data and "prenom" in data and "promo" in data:
             promo_id = bdd.get_promo_id(data['promo'])
             if promo_id == -1:
                 code = 2
@@ -54,12 +60,8 @@ def handle_request(op, data):
                 code = bdd.new_student(data)
 
     elif op == "NEW_MARK": # Commande d'ajout d'une nouvelle note
-        if "note" in data and "coef" in data:
+        if "note" in data and "coef" in data and "etud" in data:
             code = bdd.new_mark(data)
-
-    elif op == "GET_PROMO_BY_NAME": # Commande permettant de lister les promotions en fonction d'un nom
-        if "promo" in data:
-            code, reply = bdd.get_promo_by_name(data['promo'])
 
     elif op == "GET_STUDENTS_BY_PROMO":
         if "promo" in data:
@@ -88,15 +90,18 @@ def client_handle(c, infos):
             _thread.exit()
         try:
             request = json.loads(request)
+            op = request['op']
+            data = request['data']
         except:
+            reply_str = json.dumps((1, ""))
             if args.verbose:
-                reply_str = json.dumps((1, ""))
                 print(reply_str)
             c.send(reply_str.encode())
             continue
 
         if args.verbose:
             print(f"de {infos} : {request}")
+
         if request['op'] == "quit":
             if args.verbose:
                 print(f"Déconnexion de {infos}")
@@ -104,12 +109,15 @@ def client_handle(c, infos):
             c.close()
             _thread.exit()
             break
+
         else:
-            op = request['op']
-            data = request['data']
+            reply = ""
             if op not in COMMANDS:
                 code = 3
-                reply = ""
+
+            elif not isinstance(data, dict):
+                code = 2
+
             elif op == "CONNECT":
                 auth = bdd.user_auth(data)
                 if not auth:
@@ -118,11 +126,13 @@ def client_handle(c, infos):
                 else:
                     reply = "Connecté avec succès"
                     code = 0
+
             elif auth or op.startswith("GET_"):
                 code, reply = handle_request(op, data)
+
             else:
-                reply = ""
                 code = 5
+
             str_reply = json.dumps((code, reply))
             if args.verbose:
                 print("->", str_reply)

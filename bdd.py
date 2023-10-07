@@ -85,18 +85,6 @@ def get_promo_mean(promo: int)->float:
     else:
         return (0, n/d)
 
-def get_promo_by_name(promo: str)->list:
-    con = sqlite3.connect("bdd.db")
-    cur = con.cursor()
-    promo = f"%{promo}%"
-    params = (promo,)
-    cur.execute("SELECT * FROM promotions WHERE name LIKE ?", params)
-    result = []
-    for i in cur.fetchall():
-        result.append({"id": i[0], "name": i[1]})
-    con.close()
-    return (0, result)
-
 def get_etud_by_name(etud: dict)->list:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
