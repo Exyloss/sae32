@@ -17,7 +17,7 @@ NEW_STUDENT :
     "data": {
         "nom": $nom,
         "prenom": $prenom,
-        "promo": $id_promo
+        "promo": $idpromo
     }
 }
 ```
@@ -27,7 +27,9 @@ GET_STUDENT_MEAN :
 ```json
 {
     "op": "GET_STUDENT_MEAN",
-    "data": {"etud": $id_student}
+    "data": {
+        "etud": $idetud
+    }
 }
 ```
 
@@ -36,7 +38,9 @@ GET_PROMO_MEAN :
 ```json
 {
     "op": "GET_STUDENT_MEAN",
-    "data": {"etud": $id_promo}
+    "data": {
+        "etud": $idpromo
+    }
 }
 ```
 
@@ -48,7 +52,19 @@ NEW_MARK :
     "data": {
         "note": $note,
         "coef": $coef,
-        "etud": $id_etud
+        "etud": $idetud
+    }
+}
+```
+
+CONNECT :
+
+```json
+{
+    "op": "CONNECT",
+    "data": {
+        "user": $user,
+        "pass": $pass
     }
 }
 ```
