@@ -33,12 +33,14 @@ def handle_request(op, data):
     code = 1
     if op == "NEW_PROMO": # Commande d'ajout d'une nouvelle promotion
         if "promo" in data:
-            code = bdd.new_promo(data['promo'])
+            bdd.new_promo(data['promo'])
+            code = 0
 
     elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
         if "etud" in data:
             if bdd.student_exists(data['etud']):
-                code, reply = bdd.get_student_mean(data['etud'])
+                reply = bdd.get_student_mean(data['etud'])
+                code = 0
             else:
                 code = 2
 
@@ -48,7 +50,8 @@ def handle_request(op, data):
             if promo_id == -1:
                 code = 2
             else:
-                code, reply = bdd.get_promo_mean(promo_id)
+                reply = bdd.get_promo_mean(promo_id)
+                code = 0
 
     elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
         if "nom" in data and "prenom" in data and "promo" in data:
@@ -57,11 +60,13 @@ def handle_request(op, data):
                 code = 2
             else:
                 data['promo'] = promo_id
-                code = bdd.new_student(data)
+                bdd.new_student(data)
+                code = 0
 
     elif op == "NEW_MARK": # Commande d'ajout d'une nouvelle note
         if "note" in data and "coef" in data and "etud" in data:
-            code = bdd.new_mark(data)
+            bdd.new_mark(data)
+            code = 0
 
     elif op == "GET_STUDENTS_BY_PROMO":
         if "promo" in data:
@@ -69,7 +74,8 @@ def handle_request(op, data):
             if promo_id == -1:
                 code = 2
             else:
-                code, reply = bdd.get_students_by_promo(promo_id)
+                reply = bdd.get_students_by_promo(promo_id)
+                code = 0
     else:
         code = 3
     return (code, reply)
