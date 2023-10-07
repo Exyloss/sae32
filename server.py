@@ -79,7 +79,11 @@ def handle_request(op, data):
 def client_handle(c):
     auth = False
     while True:
-        request = json.loads(client.recv(1024))
+        try:
+            request = json.loads(client.recv(1024))
+        except:
+            c.close()
+            _thread.exit()
         print(request['data'])
         print("IP client connecté: ", socket.gethostbyname(socket.gethostname()))
         if request['op'] == "quit":

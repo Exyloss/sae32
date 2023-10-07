@@ -17,7 +17,7 @@ def new_promo(name: str):
     cur.execute("INSERT INTO promotions(name) VALUES (?);", params)
     con.commit()
     con.close()
-    return (0, "")
+    return 0
 
 def new_student(data: dict):
     """
@@ -29,7 +29,7 @@ def new_student(data: dict):
     cur.execute("INSERT INTO etudiants(nom, prenom, idPromo) VALUES (?, ?, ?);", params)
     con.commit()
     con.close()
-    return (0, "")
+    return 0
 
 def new_mark(data: dict):
     """
@@ -41,7 +41,7 @@ def new_mark(data: dict):
     cur.execute("INSERT INTO notes(note, coef, idEtud) VALUES(?, ?, ?)", params)
     con.commit()
     con.close()
-    return (0, "")
+    return 0
 
 def get_promo_id(promo: str)->int:
     con = sqlite3.connect("bdd.db")
@@ -77,7 +77,7 @@ def get_promo_mean(promo: int)->float:
     n = 0
     d = 0
     for i in cur.fetchall():
-        n += get_student_mean(i[0])
+        n += get_student_mean(i[0])[1]
         d += 1
     con.close()
     if d == 0:

@@ -7,6 +7,15 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(("localhost", 3000))
 mes = ""
 
+ERRORS = [
+    "Succès",
+    "Requête malformée",
+    "Données demandées inexistantes",
+    "Commande appellée inexistante",
+    "Identifiants incorrects",
+    "Vous n'avez pas les privilèges pour effectuer cette requête"
+]
+
 while mes != "quit":
     mes = input(">")
     op = mes.split(" ")[0]
@@ -60,6 +69,11 @@ while mes != "quit":
         "data": data # Données nécessaires
     }
     client.sendall(json.dumps(json_data).encode()) # Envoi des données
-    data = client.recv(1024) # Réception de la réponse du serveur
-    print(data.decode('utf-8'))
+    data = json.loads(client.recv(1024).decode('utf-8'))
+    if data[0] == 0:
+        print("Résultat:")
+        print(data[1])
+    else:
+        print("erreur, code",data[0])
+        print(ERRORS[data[0]])
 client.close()
