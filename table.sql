@@ -30,6 +30,15 @@ CREATE TABLE notes
     FOREIGN KEY(idEtud) REFERENCES etudiants(idEtud)
 );
 
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users
+(
+    idUser	INTEGER	PRIMARY KEY AUTOINCREMENT,
+    user	INTEGER	NOT NULL,
+    passwd	INTEGER	NOT NULL
+);
+
 
 COMMIT;
 

@@ -1,6 +1,15 @@
 #!/usr/bin/env python3
 import sqlite3
 
+def user_auth(data: dict)->bool:
+    con = sqlite3.connect("bdd.db")
+    cur = con.cursor()
+    params = (data["user"], data["pass"])
+    cur.execute("SELECT * FROM users WHERE user=? AND passwd=?;", params)
+    result = len(cur.fetchall()) != 0
+    con.close()
+    return result
+
 def new_promo(name: str):
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
@@ -64,8 +73,8 @@ def get_promo_mean(promo: int)->float:
     n = 0
     d = len(students)
     for i in students:
-        print(i)
         n += get_student_mean(i[0])
+    con.close()
     return n/d
 
 def get_promo_by_name(promo: str)->list:
@@ -77,29 +86,35 @@ def get_promo_by_name(promo: str)->list:
     result = []
     for i in cur.fetchall():
         result.append({"id": i[0], "name": i[1]})
+    con.close()
     return result
 
 def get_etud_by_name(etud: dict)->list:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
-    params = (nom, prenom)
+    params = (etud['nom'], etud['prenom'])
     cur.execute("SELECT * FROM etudiants WHERE nom LIKE '%?%' AND prenom LIKE '%?%';", params)
     result = []
     for i in cur.fetchall():
         result.append({"id": i[0], "name": i[1]})
+    con.close()
     return result
 
 def get_students_by_promo(promo: int)->list:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
-    cur.execute("SELECT * FROM etudiants WHERE idPromo=?;", params)
+    cur.execute("SELECT etudiants.idEtud, nom, prenom, note, coef FROM etudiants JOIN notes ON notes.idEtud = etudiants.idEtud WHERE idPromo=?;", params)
     result = []
     for i in cur.fetchall():
-        result.append({"idEtud": i[0], "nom": i[1], "prenom": i[2], "idPromo": i[3]})
+        if i[0] not in [j["idEtud"] for j in result]:
+            result.append({"idEtud": i[0], "nom": i[1], "prenom": i[2], "notes": [(i[3], i[4])]})
+        else:
+            k = 0
+            while result[k]["idEtud"] != i[0]:
+                k += 1
+            result[k]["notes"].append((i[3], i[4]))
+
+    con.close()
     return result
 
-#new_student({"nom": "LE NOOB", "prenom": "Yoan", "promo": 1})
-#new_promo("RT1")
-#new_mark({"note": 14, "coef": 3, "etud": 1})
-#print(get_promo_mean({"promo": 1}))
