@@ -64,6 +64,10 @@ while mes != "quit":
     elif op == "quit":
         data = ""
 
+    else:
+        print("erreur, commande invalide.")
+        continue
+
     json_data = {
         "op": op, # Nom de la commande
         "data": data # Données nécessaires

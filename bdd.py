@@ -112,7 +112,9 @@ def get_students_by_promo(promo: int)->list:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
-    cur.execute("SELECT etudiants.idEtud, nom, prenom, note, coef FROM etudiants JOIN notes ON notes.idEtud = etudiants.idEtud WHERE idPromo=?;", params)
+    cur.execute("SELECT etudiants.idEtud, nom, prenom, note, coef \
+                FROM etudiants \
+                JOIN notes ON notes.idEtud = etudiants.idEtud WHERE idPromo=?;", params)
     result = []
     for i in cur.fetchall():
         if i[0] not in [j["idEtud"] for j in result]:
@@ -126,3 +128,20 @@ def get_students_by_promo(promo: int)->list:
     con.close()
     return (0, result)
 
+def etud_exists(idEtud: int)->bool:
+    con = sqlite3.connect("bdd.db")
+    cur = con.cursor()
+    params = (idEtud,)
+    cur.execute("SELECT * FROM etudiants WHERE idEtud=?;", params)
+    values = cur.fetchall()
+    con.close()
+    return len(values) == 1
+
+def promo_exists(idPromo: int)->bool:
+    con = sqlite3.connect("bdd.db")
+    cur = con.cursor()
+    params = (idPromo,)
+    cur.execute("SELECT * FROM promotions WHERE idPromo=?;", params)
+    values = cur.fetchall()
+    con.close()
+    return len(values) == 1
