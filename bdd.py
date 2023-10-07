@@ -17,6 +17,7 @@ def new_promo(name: str):
     cur.execute("INSERT INTO promotions(name) VALUES (?);", params)
     con.commit()
     con.close()
+    return (0, "")
 
 def new_student(data: dict):
     """
@@ -24,10 +25,11 @@ def new_student(data: dict):
     """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
-    params = (data['nom'], data['prenom'], data['promo'],)
+    params = (data['nom'], data['prenom'], data['promo'])
     cur.execute("INSERT INTO etudiants(nom, prenom, idPromo) VALUES (?, ?, ?);", params)
     con.commit()
     con.close()
+    return (0, "")
 
 def new_mark(data: dict):
     """
@@ -35,10 +37,11 @@ def new_mark(data: dict):
     """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
-    params = (data['note'], data['coef'], data['etud'],)
+    params = (data['note'], data['coef'], data['etud'])
     cur.execute("INSERT INTO notes(note, coef, idEtud) VALUES(?, ?, ?)", params)
     con.commit()
     con.close()
+    return (0, "")
 
 def get_promo_id(promo: str)->int:
     con = sqlite3.connect("bdd.db")
@@ -56,26 +59,31 @@ def get_student_mean(etud: int)->float:
     cur = con.cursor()
     params = (etud,)
     cur.execute("SELECT note, coef FROM notes WHERE idEtud=?;", params)
-    marks = cur.fetchall()
     n = 0
     d = 0
-    for i in marks:
+    for i in cur.fetchall():
         d += i[1]
         n += i[1]*i[0]
-    return n/d
+    if d == 0:
+        return (2, "")
+    else:
+        return (0, n/d)
 
 def get_promo_mean(promo: int)->float:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
     cur.execute("SELECT idEtud FROM etudiants WHERE idPromo=?;", params)
-    students = cur.fetchall()
     n = 0
-    d = len(students)
-    for i in students:
+    d = 0
+    for i in cur.fetchall():
         n += get_student_mean(i[0])
+        d += 1
     con.close()
-    return n/d
+    if d == 0:
+        return (2, "")
+    else:
+        return (0, n/d)
 
 def get_promo_by_name(promo: str)->list:
     con = sqlite3.connect("bdd.db")
@@ -87,7 +95,7 @@ def get_promo_by_name(promo: str)->list:
     for i in cur.fetchall():
         result.append({"id": i[0], "name": i[1]})
     con.close()
-    return result
+    return (0, result)
 
 def get_etud_by_name(etud: dict)->list:
     con = sqlite3.connect("bdd.db")
@@ -98,7 +106,7 @@ def get_etud_by_name(etud: dict)->list:
     for i in cur.fetchall():
         result.append({"id": i[0], "name": i[1]})
     con.close()
-    return result
+    return (0, result)
 
 def get_students_by_promo(promo: int)->list:
     con = sqlite3.connect("bdd.db")
@@ -116,5 +124,5 @@ def get_students_by_promo(promo: int)->list:
             result[k]["notes"].append((i[3], i[4]))
 
     con.close()
-    return result
+    return (0, result)
 

@@ -1,17 +1,11 @@
 #!/usr/bin/env python3
 import socket
 import json
+import getpass
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(("localhost", 3000))
 mes = ""
-user = input("login>")
-passwd = input("passwd>")
-dic = {"user": user, "pass": passwd}
-client.sendall(json.dumps(dic).encode())
-auth_reply = client.recv(1024).decode()
-print(auth_reply)
-if auth_reply == "connexion impossible":
-    quit()
 
 while mes != "quit":
     mes = input(">")
@@ -52,6 +46,11 @@ while mes != "quit":
         promo = " ".join(mes.split(" ")[1:])
         data = {"promo": promo}
         data = {"promo": int(promo)}
+
+    elif op == "CONNECT":
+        user = input("login>")
+        passwd = getpass.getpass('passwd>')
+        data = {"user": user, "pass": passwd}
 
     elif op == "quit":
         data = ""

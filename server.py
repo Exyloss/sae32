@@ -10,63 +10,100 @@ serveur.bind(('', 3000)) # Ecoute sur le port 3000
 serveur.listen()
 
 
-def handle_command(op, data, c):
+def handle_request(op, data):
     if op == "NEW_PROMO": # Commande d'ajout d'une nouvelle promotion
-        bdd.new_promo(data['promo'])
-        c.send("message reçu.".encode())
-    elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
-        mean = bdd.get_student_mean(data['etud'])
-        reply = {"reply": mean}
-        reply = json.dumps(reply)
-        c.send(reply.encode())
-    elif op == "GET_PROMO_MEAN": # Commande permettant de récupérer la moyenne d'une promotion
-        if data.get("promo") is not None:
-            mean = bdd.get_promo_mean(data['promo'])
-            reply = {"reply": mean}
-            reply = json.dumps(reply)
-            c.send(reply.encode())
-    elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
-        promo_id = bdd.get_promo_id(data['promo'])
-        if promo_id != -1:
-            data['promo'] = promo_id
-            bdd.new_student(data)
-            c.send("étudiant créé".encode())
+        if "promo" not in data:
+            code = 1
+            reply = ""
         else:
-            c.send("erreur".encode())
+            code, reply = bdd.new_promo(data['promo'])
+
+    elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
+        if "etud" not in data:
+            code = 1
+            reply = ""
+        else:
+            code, reply = bdd.get_student_mean(data['etud'])
+
+    elif op == "GET_PROMO_MEAN": # Commande permettant de récupérer la moyenne d'une promotion
+        if "promo" not in data:
+            code = 1
+            reply = ""
+        else:
+            code, reply = bdd.get_promo_mean(data['promo'])
+
+    elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
+        if "nom" not in data or prenom not in data or promo not in data:
+            code = 1
+            reply = ""
+        else:
+            promo_id = bdd.get_promo_id(data['promo'])
+            if promo_id == -1:
+                code = 2
+                reply = ""
+            else:
+                data['promo'] = promo_id
+                code, reply = bdd.new_student(data)
+
     elif op == "NEW_MARK": # Commande d'ajout d'une nouvelle note
-        bdd.new_mark(data)
-        c.send("note ajoutée avec succés.".encode())
+        if "note" not in data or "coef" not in data:
+            code = 1
+            reply = ""
+        else:
+            code, reply = bdd.new_mark(data)
+
     elif op == "GET_PROMO_BY_NAME": # Commande permettant de lister les promotions en fonction d'un nom
-        c.send(str(bdd.get_promo_by_name(data['promo'])).encode())
+        if "promo" not in data:
+            code = 1
+            reply = ""
+        else:
+            code, reply = bdd.get_promo_by_name(data['promo'])
+
     elif op == "GET_STUDENTS_BY_PROMO":
-        c.send(str(bdd.get_students_by_promo(data['promo'])).encode())
+        if "promo" not in data:
+            code = 1
+            reply = ""
+        else:
+            promo_id = bdd.get_promo_id(data['promo'])
+            if promo_id == -1:
+                code = 2
+                reply = ""
+            else:
+                code, reply = bdd.get_students_by_promo(promo_id)
+    else:
+        code = 3
+        reply = ""
+    return (code, reply)
 
 
 def client_handle(c):
-    ids = client.recv(1024).decode("utf-8")
-    ids = json.loads(ids)
-    auth = bdd.user_auth(ids)
-    if not auth:
-        c.send("connexion impossible".encode())
-        c.close()
-        _thread.exit()
-    else:
-        c.send("connecté".encode())
-
+    auth = False
     while True:
-        request = client.recv(1024).decode("utf-8")
-        req_json = json.loads(request) # On convertit la chaine de caractères en json
-        print(req_json['data'])
+        request = json.loads(client.recv(1024))
+        print(request['data'])
         print("IP client connecté: ", socket.gethostbyname(socket.gethostname()))
-        if req_json['op'] == "quit":
-            print("sortie en cours...")
+        if request['op'] == "quit":
+            print("Sortie en cours...")
             c.close()
             _thread.exit()
             break
         else:
-            op = req_json['op']
-            data = req_json['data']
-            handle_command(op, data, c)
+            op = request['op']
+            data = request['data']
+            if op == "CONNECT":
+                auth = bdd.user_auth(data)
+                if not auth:
+                    reply = "Connexion impossible"
+                    code = 4
+                else:
+                    reply = "Connecté avec succès"
+                    code = 0
+            elif auth or op.startswith("GET_"):
+                code, reply = handle_request(op, data)
+            else:
+                reply = ""
+                code = 5
+            c.send(json.dumps((code, reply)).encode())
 
 while True:
     client, infosclient = serveur.accept()
