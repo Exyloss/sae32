@@ -114,7 +114,6 @@ def client_handle(c, infos):
             c.send(json.dumps((0, "disconnected")).encode())
             c.close()
             _thread.exit()
-            break
 
         else:
             reply = ""
