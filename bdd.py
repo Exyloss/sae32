@@ -72,7 +72,7 @@ def get_promo_mean(promo: int)->float:
     n = 0
     d = 0
     for i in cur.fetchall():
-        n += get_student_mean(i[0])[1]
+        n += get_student_mean(i[0])
         d += 1
     con.close()
     return n/d
@@ -97,7 +97,7 @@ def get_students_by_promo(promo: int)->list:
     con.close()
     return result
 
-def etud_exists(idEtud: int)->bool:
+def student_exists(idEtud: int)->bool:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (idEtud,)
