@@ -7,6 +7,9 @@ toc: true
 output: pdf_document
 fontsize: 5em
 lang: fr
+header-includes:
+  - \usepackage{titling}
+  - \setlength{\droptitle}{7cm} 
 ---
 
 \vspace{2cm}
