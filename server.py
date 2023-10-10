@@ -5,6 +5,7 @@ import _thread
 import bdd
 import argparse
 
+# Paramètre de la commande permettant de rendre le programme verbeux
 parser = argparse.ArgumentParser()
 parser.add_argument("--verbose",
                     "-v",
@@ -69,7 +70,7 @@ def handle_request(op, data):
             bdd.new_mark(data)
             code = 0
 
-    elif op == "GET_STUDENTS_BY_PROMO":
+    elif op == "GET_STUDENTS_BY_PROMO": # Obtenir la liste des étudiants par promotion avec leurs notes
         if "promo" in data:
             promo_id = bdd.get_promo_id(data['promo'])
             if promo_id == -1:
@@ -89,17 +90,17 @@ def client_handle(c, infos):
     auth = False
     while True:
         try:
-            request = client.recv(1024)
+            request = client.recv(1024) # Réception des données du client
         except:
             if args.verbose:
                 print(f"Déconnexion violente de {infos}")
             c.close()
             _thread.exit()
         try:
-            request = json.loads(request)
-            op = request['op']
-            data = request['data']
-        except:
+            request = json.loads(request) # On transforme la chaine de caractères en JSON
+            op = request['op'] # Nom de la commande appellée
+            data = request['data'] # Données envoyées avec la commande
+        except: # S'il y a une erreur dans la lecture du JSON :
             reply_str = json.dumps((1, ""))
             if args.verbose:
                 print(reply_str)
@@ -118,23 +119,23 @@ def client_handle(c, infos):
 
         else:
             reply = ""
-            if op not in COMMANDS:
+            if op not in COMMANDS: # Si la commande demandée n'existe pas
                 code = 3
 
             elif not isinstance(data, dict):
                 code = 2
 
-            elif op == "CONNECT":
+            elif op == "CONNECT": # Si l'utilisateur veut se connecter
                 auth = bdd.user_auth(data)
-                if not auth:
+                if not auth: # Si la connexion échoue
                     reply = "Connexion impossible"
                     code = 4
                 else:
                     reply = "Connecté avec succès"
                     code = 0
 
-            elif auth or op.startswith("GET_"):
-                code, reply = handle_request(op, data)
+            elif auth or op.startswith("GET_"): # Si l'utilisateur est connecté ou que la commande commence par GET
+                code, reply = handle_request(op, data) # On traite les données
 
             else:
                 code = 5
@@ -142,10 +143,10 @@ def client_handle(c, infos):
             str_reply = json.dumps((code, reply))
             if args.verbose:
                 print("->", str_reply)
-            c.send(str_reply.encode())
+            c.send(str_reply.encode()) # Envoi de la réponse au format (code, données)
 
 while True:
-    client, infosclient = serveur.accept()
-    _thread.start_new_thread(client_handle, (client, infosclient))
+    client, infosclient = serveur.accept() # On accepte les connexions entrantes
+    _thread.start_new_thread(client_handle, (client, infosclient)) # A chaque nouvelle connexion, on ouvre un nouveau thread
 
 serveur.close()

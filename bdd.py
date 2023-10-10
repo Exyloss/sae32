@@ -47,6 +47,10 @@ def new_mark(data: dict):
     con.close()
 
 def get_promo_id(promo: str)->int:
+    """
+    entrée: nom de la promotion (str)
+    sortie: id de la promotion, -1 sinon
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
@@ -59,6 +63,10 @@ def get_promo_id(promo: str)->int:
         return promo_id[0][0]
 
 def get_student_mean(etud: int)->float:
+    """
+    entrée: identifiant de l'élève (int)
+    sortie: moyenne de l'étudiant
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (etud,)
@@ -71,6 +79,10 @@ def get_student_mean(etud: int)->float:
     return n/d
 
 def get_promo_mean(promo: int)->float:
+    """
+    entrée: identifiant de la promotion (int)
+    sortie: moyenne de la promotion
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
@@ -84,6 +96,10 @@ def get_promo_mean(promo: int)->float:
     return n/d
 
 def get_students_by_promo(promo: int)->list:
+    """
+    entrée: identifiant de la promotion (int)
+    sortie: liste de dictionnaires
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (promo,)
@@ -104,6 +120,10 @@ def get_students_by_promo(promo: int)->list:
     return result
 
 def get_student_id(data: dict)->int:
+    """
+    entrée: { "nom": $nom, "prenom": $prenom, "promo": $promo }
+    sortie: id de l'étudiant, -1 sinon
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     promo_id = get_promo_id(data["promo"])
