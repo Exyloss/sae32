@@ -35,8 +35,10 @@ while mes != "quit":
         data = {"promo": promo}
 
     elif op == "GET_STUDENT_MEAN":
-        student = mes.split(" ")[1]
-        data = {"etud": student}
+        nom = input("Nom de l'étudiant>")
+        prenom = input("Prénom de l'étudiant")
+        promo = input("Promotion de l'étudiant")
+        data = {"nom": nom, "prenom": prenom, "promo": promo}
 
     elif op == "NEW_MARK":
         student = int(mes.split(" ")[1])

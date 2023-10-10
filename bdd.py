@@ -2,6 +2,9 @@
 import sqlite3
 
 def user_auth(data: dict)->bool:
+    """
+    entrée : { "user": $username, "pass": $password }
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (data["user"], data["pass"])
@@ -11,6 +14,9 @@ def user_auth(data: dict)->bool:
     return result
 
 def new_promo(name: str):
+    """
+    entrée : { "name": $promo_name }
+    """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
     params = (name,)
@@ -20,7 +26,7 @@ def new_promo(name: str):
 
 def new_student(data: dict):
     """
-    entrée: {nom, prenom, id_promo}
+    entrée: { "nom": $nom, "prenom": $prenom, "promo": $idPromo }
     """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
@@ -31,7 +37,7 @@ def new_student(data: dict):
 
 def new_mark(data: dict):
     """
-    entrée: {note, coef, idEtud}
+    entrée: { "note": $note, "coef": $coef}
     """
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
@@ -97,11 +103,17 @@ def get_students_by_promo(promo: int)->list:
     con.close()
     return result
 
-def student_exists(idEtud: int)->bool:
+def get_student_id(data: dict)->int:
     con = sqlite3.connect("bdd.db")
     cur = con.cursor()
-    params = (idEtud,)
-    cur.execute("SELECT * FROM etudiants WHERE idEtud=?;", params)
+    promo_id = get_promo_id(data["promo"])
+    params = (data["nom"], data["prenom"], promo_id)
+    cur.execute("SELECT idEtud FROM etudiants WHERE nom=? AND prenom=? AND idPromo=?;", params)
     values = cur.fetchall()
     con.close()
-    return len(values) == 1
+    if len(values) == 0:
+        id_etud = -1
+    else:
+        id_etud = values[0][0]
+
+    return id_etud

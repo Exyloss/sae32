@@ -37,9 +37,10 @@ def handle_request(op, data):
             code = 0
 
     elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
-        if "etud" in data:
-            if bdd.student_exists(data['etud']):
-                reply = bdd.get_student_mean(data['etud'])
+        if "nom" in data and "prenom" in data and "promo" in data:
+            student_id = bdd.get_student_id(data)
+            if student_id != -1:
+                reply = bdd.get_student_mean(student_id)
                 code = 0
             else:
                 code = 2
