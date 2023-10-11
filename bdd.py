@@ -12,7 +12,7 @@ def user_auth(data: dict)->bool:
     cur = con.cursor()
     params = (data["user"], data["pass"])
     cur.execute("SELECT * FROM users WHERE user=? AND passwd=?;", params)
-    result = len(cur.fetchall()) != 0
+    result = len(cur.fetchall()) != 0 # Booléen si l'utilisateur avec le bon mot de passe est dans la BDD
     con.close()
     return result
 
@@ -69,7 +69,7 @@ def get_promo_id(promo)->int:
     cur.execute("SELECT idPromo FROM promotions WHERE name=?;", params)
     promo_id = cur.fetchall()
     con.close()
-    if len(promo_id) == 0:
+    if len(promo_id) == 0: # S'il n'y a pas de promotions correspondantes
         return -1
     else:
         return promo_id[0][0]
@@ -128,13 +128,13 @@ def get_students_by_promo(promo)->list:
                 JOIN notes ON notes.idEtud = etudiants.idEtud WHERE idPromo=?;", params)
     result = []
     for i in cur.fetchall():
-        if i[0] not in [j["idEtud"] for j in result]:
+        if i[0] not in [j["idEtud"] for j in result]: # Si l'étudiant n'est pas déjà dans le tableau result
             result.append({"idEtud": i[0], "nom": i[1], "prenom": i[2], "notes": [(i[3], i[4])]})
         else:
             k = 0
             while result[k]["idEtud"] != i[0]:
-                k += 1
-            result[k]["notes"].append((i[3], i[4]))
+                k += 1 # k est égal à l'indice de l'entrée de l'étudiant
+            result[k]["notes"].append((i[3], i[4])) # On ajoute une note à l'étudiant
 
     con.close()
     return result
@@ -155,7 +155,7 @@ def get_student_id(data: dict)->int:
     cur.execute("SELECT idEtud FROM etudiants WHERE nom=? AND prenom=? AND idPromo=?;", params)
     values = cur.fetchall()
     con.close()
-    if len(values) == 0:
+    if len(values) == 0: # S'il n'y a pas d'étudiant correspondant
         id_etud = -1
     else:
         id_etud = values[0][0]

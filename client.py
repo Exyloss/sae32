@@ -5,7 +5,6 @@ import getpass
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(("localhost", 3000))
-mes = ""
 
 ERRORS = [
     "Succès",
@@ -33,10 +32,8 @@ for i in COMMANDS:
 print()
 
 
-while mes != "quit":
-    mes = input(">")
-    op = mes.split(" ")[0]
-
+while True:
+    op = input("cmd>")
     if op == "NEW_STUDENT":
         nom = input("Nom de l'étudiant>")
         prenom = input("Prénom de l'étudiant>")
