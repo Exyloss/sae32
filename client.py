@@ -49,17 +49,9 @@ while mes != "quit":
         coef = int(input("coefficient de la note>"))
         data = {"etud": {"nom": nom, "prenom": prenom, "promo": promo}, "note": note, "coef": coef}
 
-    elif op == "GET_PROMO_BY_NAME":
-        promo = " ".join(mes.split(" ")[1:])
-        data = {"promo": promo}
-
-    elif op == "GET_STUDENTS_BY_NAME":
-        data = {"promo": promo}
-
     elif op == "GET_STUDENTS_BY_PROMO":
-        promo = " ".join(mes.split(" ")[1:])
+        promo = input("Nom de la promotion>")
         data = {"promo": promo}
-        data = {"promo": int(promo)}
 
     elif op == "CONNECT":
         user = input("login>")

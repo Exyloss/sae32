@@ -95,8 +95,6 @@ def handle_request(op, data):
 
 
 def client_handle(c, infos):
-    #global nbclients
-    #print(nbclients)
     if args.verbose:
         print(f"{infosclient} s'est connecté.")
 
