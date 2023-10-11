@@ -13,7 +13,8 @@ ERRORS = [
     "Données demandées inexistantes",
     "Commande appellée inexistante",
     "Identifiants incorrects",
-    "Vous n'avez pas les privilèges pour effectuer cette requête"
+    "Vous n'avez pas les privilèges pour effectuer cette requête",
+    "Les données existent déjà"
 ]
 
 while mes != "quit":
@@ -27,24 +28,26 @@ while mes != "quit":
         data = {"nom": nom, "prenom": prenom, "promo": promo}
 
     elif op == "NEW_PROMO":
-        name = " ".join(mes.split(" ")[1:])
-        data = {"name": name}
+        name = input("Nom de la nouvelle promotion>")
+        data = {"promo": name}
 
     elif op == "GET_PROMO_MEAN":
-        promo = mes.split(" ")[1]
+        promo = input("Promotion de l'étudiant>")
         data = {"promo": promo}
 
     elif op == "GET_STUDENT_MEAN":
         nom = input("Nom de l'étudiant>")
-        prenom = input("Prénom de l'étudiant")
-        promo = input("Promotion de l'étudiant")
+        prenom = input("Prénom de l'étudiant>")
+        promo = input("Promotion de l'étudiant>")
         data = {"nom": nom, "prenom": prenom, "promo": promo}
 
     elif op == "NEW_MARK":
-        student = int(mes.split(" ")[1])
+        nom = input("Nom de l'étudiant>")
+        prenom = input("Prénom de l'étudiant>")
+        promo = input("Promotion de l'étudiant>")
         note = int(input("note de l'étudiant>"))
         coef = int(input("coefficient de la note>"))
-        data = {"etud": student, "note": note, "coef": coef}
+        data = {"etud": {"nom": nom, "prenom": prenom, "promo": promo}, "note": note, "coef": coef}
 
     elif op == "GET_PROMO_BY_NAME":
         promo = " ".join(mes.split(" ")[1:])
@@ -77,7 +80,7 @@ while mes != "quit":
     client.sendall(json.dumps(json_data).encode()) # Envoi des données
     data = json.loads(client.recv(1024).decode('utf-8'))
     if data[0] == 0:
-        print("Résultat:")
+        print("Résultat (Succès):")
         print(data[1])
     else:
         print("erreur, code",data[0])

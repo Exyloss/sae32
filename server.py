@@ -34,8 +34,12 @@ def handle_request(op, data):
     code = 1
     if op == "NEW_PROMO": # Commande d'ajout d'une nouvelle promotion
         if "promo" in data:
-            bdd.new_promo(data['promo'])
-            code = 0
+            promo_id = bdd.get_promo_id(data["promo"])
+            if promo_id == -1:
+                bdd.new_promo(data['promo'])
+                code = 0
+            else:
+                code = 6
 
     elif op == "GET_STUDENT_MEAN": # Commande permettant de récupérer la moyenne d'un étudiant
         if "nom" in data and "prenom" in data and "promo" in data:
@@ -57,18 +61,24 @@ def handle_request(op, data):
 
     elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
         if "nom" in data and "prenom" in data and "promo" in data:
-            promo_id = bdd.get_promo_id(data['promo'])
-            if promo_id == -1:
-                code = 2
-            else:
+            etud_id = bdd.get_student_id(data)
+            if etud_id == -1:
                 data['promo'] = promo_id
                 bdd.new_student(data)
                 code = 0
+            else:
+                code = 6
 
     elif op == "NEW_MARK": # Commande d'ajout d'une nouvelle note
-        if "note" in data and "coef" in data and "etud" in data:
-            bdd.new_mark(data)
-            code = 0
+        if "note" in data and "coef" in data and "etud" in data and \
+                "nom" in data["etud"] and "prenom" in data["etud"] and "promo" in data["etud"]:
+            etud_id = bdd.get_student_id(data["etud"])
+            if etud_id != -1:
+                data["etud"] = etud_id
+                bdd.new_mark(data)
+                code = 0
+            else:
+                code = 2
 
     elif op == "GET_STUDENTS_BY_PROMO": # Obtenir la liste des étudiants par promotion avec leurs notes
         if "promo" in data:
@@ -93,7 +103,7 @@ def client_handle(c, infos):
             request = client.recv(1024) # Réception des données du client
         except:
             if args.verbose:
-                print(f"Déconnexion violente de {infos}")
+                print(f"Déconnexion de {infos}")
             c.close()
             _thread.exit()
         try:
