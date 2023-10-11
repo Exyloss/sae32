@@ -17,6 +17,22 @@ ERRORS = [
     "Les données existent déjà"
 ]
 
+COMMANDS = [
+    ["NEW_PROMO", "Créer une nouvelle promotion"],
+    ["NEW_STUDENT", "Ajouter un nouvel étudiant à une promotion"],
+    ["NEW_MARK", "Ajouter une nouvelle note à un étudiant"],
+    ["GET_STUDENT_MEAN", "Obtenir la moyenne d'un étudiant"],
+    ["GET_PROMO_MEAN", "Obtenir la moyenne d'une promotion"],
+    ["GET_STUDENTS_BY_PROMO", "Obtenir la liste des étudiants par promotion avce leurs notes"],
+    ["AUTH", "S'authentifier"]
+]
+
+print("Commandes possibles :")
+for i in COMMANDS:
+    print(i[0], "->", i[1])
+print()
+
+
 while mes != "quit":
     mes = input(">")
     op = mes.split(" ")[0]
@@ -32,7 +48,7 @@ while mes != "quit":
         data = {"promo": name}
 
     elif op == "GET_PROMO_MEAN":
-        promo = input("Promotion de l'étudiant>")
+        promo = input("Nom de la promotion>")
         data = {"promo": promo}
 
     elif op == "GET_STUDENT_MEAN":
@@ -53,7 +69,7 @@ while mes != "quit":
         promo = input("Nom de la promotion>")
         data = {"promo": promo}
 
-    elif op == "CONNECT":
+    elif op == "AUTH":
         user = input("login>")
         passwd = getpass.getpass('passwd>')
         data = {"user": user, "pass": passwd}

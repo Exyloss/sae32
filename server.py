@@ -26,7 +26,7 @@ COMMANDS = [
     "NEW_STUDENT",
     "NEW_MARK",
     "GET_STUDENTS_BY_PROMO",
-    "CONNECT"
+    "AUTH"
 ]
 
 def handle_request(op, data):
@@ -135,13 +135,13 @@ def client_handle(c, infos):
             elif not isinstance(data, dict):
                 code = 2
 
-            elif op == "CONNECT": # Si l'utilisateur veut se connecter
+            elif op == "AUTH": # Si l'utilisateur veut se connecter
                 auth = bdd.user_auth(data)
-                if not auth: # Si la connexion échoue
-                    reply = "Connexion impossible"
+                if not auth: # Si l'authentification échoue
+                    reply = "Authentification impossible"
                     code = 4
                 else:
-                    reply = "Connecté avec succès"
+                    reply = "Authentifié avec succès"
                     code = 0
 
             elif auth or op.startswith("GET_"): # Si l'utilisateur est connecté ou que la commande commence par GET
@@ -153,6 +153,7 @@ def client_handle(c, infos):
             str_reply = json.dumps((code, reply))
             if args.verbose:
                 print("->", str_reply)
+
             c.send(str_reply.encode()) # Envoi de la réponse au format (code, données)
 
 while True:
