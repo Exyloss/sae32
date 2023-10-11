@@ -13,6 +13,10 @@ parser.add_argument("--verbose",
                     action="store_true")
 args = parser.parse_args()
 
+nbclients = 0
+clients = []
+numclient = None
+
 # initialisation du serveur
 serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serveur.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -33,7 +37,7 @@ def handle_request(op, data):
     reply = ""
     code = 1
     if op == "NEW_PROMO": # Commande d'ajout d'une nouvelle promotion
-        if "promo" in data:
+        if "promo" in data and isinstance("promo", str):
             promo_id = bdd.get_promo_id(data["promo"])
             if promo_id == -1:
                 bdd.new_promo(data['promo'])
@@ -62,6 +66,7 @@ def handle_request(op, data):
     elif op == "NEW_STUDENT": # Commande d'ajout d'un nouvel étudiant
         if "nom" in data and "prenom" in data and "promo" in data:
             etud_id = bdd.get_student_id(data)
+            promo_id = bdd.get_promo_id(data["promo"])
             if etud_id == -1:
                 data['promo'] = promo_id
                 bdd.new_student(data)
@@ -94,14 +99,17 @@ def handle_request(op, data):
 
 
 def client_handle(c, infos):
+    global nbclients
+    print(nbclients)
     if args.verbose:
         print(f"{infosclient} s'est connecté.")
 
     auth = False
     while True:
         try:
-            request = client.recv(1024) # Réception des données du client
+            request = c.recv(1024) # Réception des données du client
         except:
+            print("erreur")
             if args.verbose:
                 print(f"Déconnexion de {infos}")
             c.close()
@@ -111,6 +119,7 @@ def client_handle(c, infos):
             op = request['op'] # Nom de la commande appellée
             data = request['data'] # Données envoyées avec la commande
         except: # S'il y a une erreur dans la lecture du JSON :
+            print("erreur")
             reply_str = json.dumps((1, ""))
             if args.verbose:
                 print(reply_str)
@@ -123,8 +132,10 @@ def client_handle(c, infos):
         if request['op'] == "quit":
             if args.verbose:
                 print(f"Déconnexion de {infos}")
-            c.send(json.dumps((0, "disconnected")).encode())
-            c.close()
+            numclient = request["data"]
+            clients[numclient].close()
+            clients.pop(numclient)
+            nbclients-=1
             _thread.exit()
 
         else:
@@ -154,9 +165,14 @@ def client_handle(c, infos):
             if args.verbose:
                 print("->", str_reply)
             c.send(str_reply.encode()) # Envoi de la réponse au format (code, données)
+            print("réponse envoyée")
 
 while True:
     client, infosclient = serveur.accept() # On accepte les connexions entrantes
+    client.send(str.encode(str(nbclients)))
+    clients.append(client)
     _thread.start_new_thread(client_handle, (client, infosclient)) # A chaque nouvelle connexion, on ouvre un nouveau thread
+    nbclients += 1
+    print('Thread Number: ' + str(nbclients))
 
 serveur.close()

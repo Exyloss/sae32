@@ -6,6 +6,7 @@ import getpass
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(("localhost", 3000))
 mes = ""
+num = int(client.recv(1024))
 
 ERRORS = [
     "Succès",
@@ -67,7 +68,8 @@ while mes != "quit":
         data = {"user": user, "pass": passwd}
 
     elif op == "quit":
-        data = ""
+        client.sendall(json.dumps({"op": "quit", "data": num}).encode())
+        quit()
 
     else:
         print("erreur, commande invalide.")
@@ -77,6 +79,7 @@ while mes != "quit":
         "op": op, # Nom de la commande
         "data": data # Données nécessaires
     }
+    print("->", json_data)
     client.sendall(json.dumps(json_data).encode()) # Envoi des données
     data = json.loads(client.recv(1024).decode('utf-8'))
     if data[0] == 0:
