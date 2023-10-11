@@ -13,10 +13,6 @@ parser.add_argument("--verbose",
                     action="store_true")
 args = parser.parse_args()
 
-nbclients = 0
-clients = []
-numclient = None
-
 # initialisation du serveur
 serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 serveur.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -99,8 +95,8 @@ def handle_request(op, data):
 
 
 def client_handle(c, infos):
-    global nbclients
-    print(nbclients)
+    #global nbclients
+    #print(nbclients)
     if args.verbose:
         print(f"{infosclient} s'est connecté.")
 
@@ -109,7 +105,6 @@ def client_handle(c, infos):
         try:
             request = c.recv(1024) # Réception des données du client
         except:
-            print("erreur")
             if args.verbose:
                 print(f"Déconnexion de {infos}")
             c.close()
@@ -119,7 +114,6 @@ def client_handle(c, infos):
             op = request['op'] # Nom de la commande appellée
             data = request['data'] # Données envoyées avec la commande
         except: # S'il y a une erreur dans la lecture du JSON :
-            print("erreur")
             reply_str = json.dumps((1, ""))
             if args.verbose:
                 print(reply_str)
@@ -132,10 +126,7 @@ def client_handle(c, infos):
         if request['op'] == "quit":
             if args.verbose:
                 print(f"Déconnexion de {infos}")
-            numclient = request["data"]
-            clients[numclient].close()
-            clients.pop(numclient)
-            nbclients-=1
+            c.close()
             _thread.exit()
 
         else:
@@ -165,14 +156,9 @@ def client_handle(c, infos):
             if args.verbose:
                 print("->", str_reply)
             c.send(str_reply.encode()) # Envoi de la réponse au format (code, données)
-            print("réponse envoyée")
 
 while True:
     client, infosclient = serveur.accept() # On accepte les connexions entrantes
-    client.send(str.encode(str(nbclients)))
-    clients.append(client)
     _thread.start_new_thread(client_handle, (client, infosclient)) # A chaque nouvelle connexion, on ouvre un nouveau thread
-    nbclients += 1
-    print('Thread Number: ' + str(nbclients))
 
 serveur.close()
